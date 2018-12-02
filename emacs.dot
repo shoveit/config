@@ -1,0 +1,230 @@
+
+;; Added by Package.el.  This must come before configurations of
+;; installed packages.  Don't delete this line.  If you don't want it,
+;; just comment it out by adding a semicolon to the start of the line.
+;; You may delete these explanatory comments.
+(package-initialize)
+
+(custom-set-variables
+ ;; custom-set-variables was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ '(current-language-environment "UTF-8")
+ '(custom-enabled-themes (quote (tango-dark)))
+ '(ecb-options-version "2.50")
+ '(package-archives
+   (quote
+	(("gnu" . "http://elpa.gnu.org/packages/")
+	 ("marmalade" . "http://marmalade-repo.org/packages/")
+	 ("melpa" . "http://melpa.milkbox.net/packages/")
+	 ("melpa-stable" . "http://stable.melpa.org/packages/"))))
+ '(package-selected-packages
+   (quote
+	(flycheck-haskell htmlize sr-speedbar cedit ecb nodejs-repl company-shell company cider lex))))
+
+
+(custom-set-faces
+ ;; custom-set-faces was added by Custom.
+ ;; If you edit it by hand, you could mess it up, so be careful.
+ ;; Your init file should contain only one such instance.
+ ;; If there is more than one, they won't work right.
+ )
+
+
+(global-set-key [(control ?h)] 'delete-backward-char)
+(setq x-select-enable-clipboard t)
+(setq default-tab-width 4)
+(fset 'yes-or-no-p 'y-or-n-p)
+
+
+(add-to-list 'load-path "~/.emacs.d/slime-master")
+(require 'slime-autoloads)
+
+(eval-after-load "slime"
+  '(progn
+     (add-to-list 'load-path "~/.emacs.d/slime-master/contrib")
+     (slime-setup '(slime-fancy slime-banner))
+     (setq slime-complete-symbol*-fancy t)
+     (setq slime-complete-symbol-function 'slime-fuzzy-complete-symbol)))
+
+(add-hook 'scheme-mode-hook
+          (lambda ()
+			(slime-mode t)))
+
+;;(setq scheme-program-name "csi -:c")
+;;
+;;(add-to-list 'load-path "/var/lib/chicken/8/")   ; Where Eggs are installed
+;;(autoload 'chicken-slime "chicken-slime" "SWANK backend for Chicken" t)
+;;(setq slime-csi-path "/usr/bin/csi") ;; chicken scheme
+;;(setq inferior-lisp-program "/home/asenal/BIN/acl10.1.64/mlisp")
+(setq inferior-lisp-program "/usr/bin/sbcl")
+
+;; python
+;;(setq python-shell-virtualenv-path "/home/asenal/BIN/anaconda2/")
+;;(setq python-shell-virtualenv-path "/usr/bin/python")
+
+
+(require 'package)
+
+(package-initialize)
+
+
+
+(setq visible-bell 1)
+
+;; -- babel
+(setq org-ditaa-jar-path "/usr/share/ditaa/ditaa.jar")
+(setq org-export-allow-BIND t)
+(org-babel-do-load-languages
+      'org-babel-load-languages
+      '((emacs-lisp . t)
+        (ruby . t)
+        (ditaa . t)
+        (python . t)
+        (sh . t)
+;;        (latex . t)
+		(dot . t)
+		(js . t)
+		(haskell . t)
+		(common-lisp . t)
+        (R . t)))
+
+;; -- org mode GTD
+(setq org-clock-persist 'history)
+(org-clock-persistence-insinuate)
+
+;;- auto complete
+(global-company-mode)
+(put 'downcase-region 'disabled nil)
+
+
+;;---------speedbar
+(autoload 'speedbar-frame-mode "speedbar" "Popup a speedbar frame" t)
+(autoload 'speedbar-get-focus "speedbar" "Jump to speedbar frame" t)
+
+;;主浮页和speedbar浮页之间的切换快捷键——不用设置，因为系统本身可以使用M-Tab来实现
+
+;;设置speedbar默认出现在左侧
+(add-hook 'speedbar-mode-hook
+        (lambda ()
+         (auto-raise-mode 1)
+         (add-to-list 'speedbar-frame-parameters '(top . 0))
+         (add-to-list 'speedbar-frame-parameters '(left . 0))
+         ))
+
+;显示所有文件
+(setq speedbar-show-unknown-files t)
+
+;;设置tags排列顺序为按照出现的先后次序排列
+(setq speedbar-tag-hierarchy-method '(speedbar-prefix-group-tag-hierarchy))
+
+
+(show-paren-mode t)
+
+
+;; ecb
+(require 'ecb)
+(setq ecb-tip-of-the-day nil)
+
+(global-set-key [M-left] 'windmove-left)
+(global-set-key [M-right] 'windmove-right)
+(global-set-key [M-up] 'windmove-up)
+(global-set-key [M-down] 'windmove-down)
+
+(global-set-key [f10] 'ecb-hide-ecb-windows)
+(global-set-key [s-f10] 'ecb-show-ecb-windows)
+
+
+;;--------jekyll
+;;https://www.cnblogs.com/cheukyin/p/4140941.html
+(setq org-publish-project-alist
+      '(
+        ("orgs" ;; settings for cute-jumper.github.io
+         :base-directory "~/Documents/GIT/mostlyharmless/_org"
+         :base-extension "org"
+         :publishing-directory "~/Documents/GIT/mostlyharmless/"
+         :recursive t
+         :publishing-function org-html-publish-to-html
+         :with-toc nil
+         :headline-levels 4
+         :auto-preamble nil
+         :auto-sitemap t
+         :html-extension "html"
+         :table-of-contents nil
+         :section-numbers t
+;;         :html_head "<link rel=\"stylesheet\" type=\"text/css\" href=\"../assets/themes/havee/css/style.css\" />"
+         :body-only t)
+
+        ("org-static"
+		 :base-directory "~/Documents/GIT/mostlyharmless/_org/_assets"
+          :base-extension "css\\|js\\|png\\|jpg\\|gif\\|pdf\\|mp3\\|ogg\\|swf\\|php"
+          :publishing-directory "~/Documents/GIT/mostlyharmless/assets/"
+          :recursive t
+          :publishing-function org-publish-attachment)
+
+        ("shoveit" :components ("orgs" "org-static"))
+        ))
+
+(defvar jekyll-directory (expand-file-name "~/Documents/GIT/mostlyharmless/_org/")
+  "Path to Jekyll blog.")
+(defvar jekyll-drafts-dir "_drafts/"
+  "Relative path to drafts directory.")
+(defvar jekyll-posts-dir "_posts/"
+  "Relative path to posts directory.")
+(defvar jekyll-post-ext ".org"
+  "File extension of Jekyll posts.")
+(defvar jekyll-post-template
+  "#+BEGIN_HTML\n---\nlayout: post\ntitle: %s\nexcerpt: \nkeywords: \"\"\ncategories: \ntags: []\n---\n{%% include JB/setup %%}\n#+END_HTML\n\n* \n\n\n#+BEGIN_HTML\n<!-- more-forword -->\n#+END_HTML\n\n\n#+BEGIN_HTML\n<!-- more -->\n#+END_HTML\n"
+  "Default template for Jekyll posts. %s will be replace by the post title.")
+
+(defun jekyll-make-slug (s)
+  "Turn a string into a slug."
+  (replace-regexp-in-string
+   " " "-" (downcase
+            (replace-regexp-in-string
+             "[^A-Za-z0-9 ]" "" s))))
+
+(defun jekyll-yaml-escape (s)
+  "Escape a string for YAML."
+  (if (or (string-match ":" s)
+          (string-match "\"" s))
+      (concat "\"" (replace-regexp-in-string "\"" "\\\\\"" s) "\"")
+    s))
+
+(defun jekyll-draft-post (title)
+  "Create a new Jekyll blog post."
+  (interactive "sPost Title: ")
+  (let ((draft-file (concat jekyll-directory jekyll-drafts-dir
+                            (jekyll-make-slug title)
+                            jekyll-post-ext)))
+    (if (file-exists-p draft-file)
+        (find-file draft-file)
+      (find-file draft-file)
+      (insert (format jekyll-post-template (jekyll-yaml-escape title))))))
+
+(defun jekyll-publish-post ()
+  "Move a draft post to the posts directory, and rename it so that it
+ contains the date."
+  (interactive)
+  (cond
+   ((not (equal
+          (file-name-directory (buffer-file-name (current-buffer)))
+          (concat jekyll-directory jekyll-drafts-dir)))
+    (message "This is not a draft post."))
+   ((buffer-modified-p)
+    (message "Can't publish post; buffer has modifications."))
+   (t
+    (let ((filename
+           (concat jekyll-directory jekyll-posts-dir
+                   (format-time-string "%Y-%m-%d-")
+                   (file-name-nondirectory
+                    (buffer-file-name (current-buffer)))))
+          (old-point (point)))
+      (rename-file (buffer-file-name (current-buffer))
+                   filename)
+      (kill-buffer nil)
+      (find-file filename)
+      (set-window-point (selected-window) old-point)))))
+
+;;(provide 'init-org-jekyll)
